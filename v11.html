@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NeroPerformance | Pro Finans v7.3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { nero: { dark: '#051e3e', light: '#fef3c7', red: '#ef4444' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        body { background-color: #051e3e; color: #fef3c7; font-family: 'Inter', sans-serif; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        #loginScreen { position: fixed; inset: 0; z-index: 100; background: #051e3e; display: flex; align-items: center; justify-content: center; }
+        #mainApp { display: none; }
+        .watermark-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none; opacity: 0.04; display: flex; flex-direction: column; align-items: center; }
+        .watermark-nero { font-size: 20vw; font-weight: 900; line-height: 0.8; color: #ef4444; letter-spacing: -0.05em; }
+        .watermark-perf { font-size: 5.4vw; font-weight: 900; color: #ef4444; letter-spacing: 0.58em; margin-left: 0.5em; margin-top: 5px;}
+        .sidebar { background-color: #fef3c7; color: #051e3e; width: 280px; z-index: 20; display: none; box-shadow: 10px 0 30px rgba(0,0,0,0.3); }
+        @media (min-width: 768px) { .sidebar { display: flex; } }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #fef3c7; display: flex; justify-content: space-around; padding: 12px 0 25px; z-index: 50; border-radius: 20px 20px 0 0; }
+        @media (min-width: 768px) { .bottom-nav { display: none; } }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #051e3e; }
+        .nav-item.active { background-color: #051e3e; color: #fef3c7; }
+        .nav-item-mobile { display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: 900; color: #051e3e; opacity: 0.4; }
+        .nav-item-mobile.active { opacity: 1; color: #ef4444; }
+        .glass-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(254, 243, 199, 0.15); color: #fef3c7; padding: 14px; border-radius: 14px; width: 100%; outline: none; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #fef3c7; border-radius: 10px; }
+        .prod-tag { background: #ef4444; color: white; padding: 3px 10px; border-radius: 10px; font-size: 10px; font-weight: 900; display: flex; align-items: center; gap: 6px; }
+        .fixed-signature { position: fixed; bottom: 100px; right: 20px; font-size: 8px; font-weight: 900; letter-spacing: 0.2em; color: #ef4444; opacity: 0.5; z-index: 40; pointer-events: none; }
+        @media (min-width: 768px) { .fixed-signature { bottom: 20px; right: 20px; } }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden">
+
+    <div id="loginScreen">
+        <div class="w-full max-w-sm p-10 text-center relative z-10">
+            <h1 class="text-6xl font-black italic text-nero-light mb-2">NERO</h1>
+            <p class="text-[10px] font-black tracking-[0.7em] text-red-600 mb-10 uppercase">Performance</p>
+            <div class="space-y-4">
+                <input type="text" id="username" class="glass-input text-center font-bold" placeholder="KULLANICI ADI">
+                <input type="password" id="password" class="glass-input text-center font-bold" placeholder="ŞİFRE">
+                <button onclick="handleLogin()" class="w-full bg-red-600 text-white p-5 rounded-2xl font-black uppercase shadow-xl">GİRİŞ YAP</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="flex h-full w-full">
+        <div class="watermark-container"><div class="watermark-nero">NERO</div><div class="watermark-perf">PERFORMANCE</div></div>
+        <div class="fixed-signature">POWERED BY KKMN</div>
+
+        <aside class="sidebar flex-col p-6 h-full relative">
+            <div class="mb-12 text-center">
+                <h1 class="text-4xl font-black italic text-nero-dark uppercase">Nero</h1>
+                <p class="text-[9px] font-black tracking-[0.5em] text-red-600 uppercase">Performance</p>
+            </div>
+            <nav class="flex-grow space-y-2">
+                <div onclick="switchTab('kasa')" id="btn-kasa" class="nav-item active"><i data-lucide="wallet"></i> Kasa Durumu</div>
+                <div onclick="switchTab('gecmis')" id="btn-gecmis" class="nav-item"><i data-lucide="car"></i> Araç Arşivi</div>
+                <div onclick="switchTab('stok')" id="btn-stok" class="nav-item"><i data-lucide="box"></i> Stok Takibi</div>
+            </nav>
+            <div class="mt-auto space-y-4 pt-6 border-t border-nero-dark/10">
+                <button onclick="openModal()" class="w-full bg-red-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg flex items-center justify-center gap-2"><i data-lucide="plus"></i> YENİ İŞLEM</button>
+                <button onclick="handleLogout()" class="w-full text-nero-dark/40 font-bold text-[10px] uppercase text-center py-2">GÜVENLİ ÇIKIŞ</button>
+            </div>
+        </aside>
+
+        <div class="bottom-nav">
+            <div onclick="switchTab('kasa')" id="mob-kasa" class="nav-item-mobile active"><i data-lucide="wallet"></i>KASA</div>
+            <div onclick="openModal()" class="nav-item-mobile text-red-600 opacity-100 transform -translate-y-5 bg-white p-4 rounded-full border-4 border-nero-dark shadow-2xl"><i data-lucide="plus"></i></div>
+            <div onclick="switchTab('gecmis')" id="mob-gecmis" class="nav-item-mobile"><i data-lucide="car"></i>ARŞİV</div>
+            <div onclick="handleLogout()" class="nav-item-mobile"><i data-lucide="log-out"></i>ÇIKIŞ</div>
+        </div>
+
+        <main class="flex-grow flex flex-col relative z-10 h-full w-full">
+            <header class="p-6 md:p-8 flex justify-between items-end">
+                <h2 id="pageTitle" class="text-2xl md:text-4xl font-black uppercase text-nero-light tracking-tighter italic">Kasa Durumu</h2>
+                <div id="clock" class="text-xl font-mono font-bold text-nero-light opacity-50">00:00</div>
+            </header>
+            <div id="contentArea" class="flex-grow p-4 md:p-8 overflow-y-auto pb-32 custom-scroll"></div>
+        </main>
+    </div>
+
+    <div id="entryModal" class="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/90 hidden backdrop-blur-sm p-4">
+        <div class="bg-nero-dark border-2 border-nero-light/20 p-6 rounded-3xl w-full max-w-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-nero-light uppercase italic">Yeni Kayıt</h3>
+                <button onclick="closeModal()" class="text-red-500"><i data-lucide="x-circle" class="w-8 h-8"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="m_plate" class="glass-input font-black uppercase text-center text-yellow-400 text-xl" placeholder="PLAKA">
+                    <input type="text" id="m_model" class="glass-input font-bold" placeholder="ARAÇ MODELİ">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="m_price_file" class="glass-input" placeholder="YAZILIM ₺">
+                    <input type="number" id="m_price_mech" class="glass-input" placeholder="MEKANİK ₺">
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <label class="text-[9px] font-black text-nero-light/40 uppercase block mb-2">Stoktan Ürün Düş (Çoklu)</label>
+                    <select id="m_product_select" class="glass-input bg-nero-dark text-xs mb-3" onchange="addProdToSelection()">
+                        <option value="">Ürün Seç...</option>
+                    </select>
+                    <div id="modal_selected_prods" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button onclick="saveTransaction('paid')" class="flex-1 bg-green-600 p-4 rounded-xl font-black text-white uppercase shadow-lg">NAKİT ALINDI</button>
+                    <button onclick="saveTransaction('pending')" class="flex-1 bg-yellow-600 p-4 rounded-xl font-black text-white uppercase shadow-lg">VERESİYE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyAE5S_Tyjefd_1owTbnZ5i0t9lZ9QrmDWQ", projectId: "nerookasaa" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let dbData = { inventory: [], history: [] };
+        let activeTab = 'kasa';
+        let currentSelections = [];
+
+        window.handleLogin = () => {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if(u === "admin" && p === "nero2025") { localStorage.setItem('nero_auth', 'true'); checkAuth(); }
+            else { alert("Giriş Başarısız!"); }
+        };
+
+        window.handleLogout = () => { localStorage.removeItem('nero_auth'); location.reload(); };
+
+        const checkAuth = () => {
+            if(localStorage.getItem('nero_auth') === 'true') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                syncData();
+            }
+        };
+
+        const syncData = () => {
+            onSnapshot(collection(db, 'inventory'), s => { dbData.inventory = s.docs.map(d=>({id:d.id,...d.data()})).filter(x=>!x.deleted); refreshUI(); });
+            onSnapshot(collection(db, 'history'), s => { 
+                dbData.history = s.docs.map(d=>({id:d.id,...d.data()})).filter(x=>!x.deleted);
+                dbData.history.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                refreshUI(); 
+            });
+        };
+
+        window.switchTab = (t) => {
+            activeTab = t;
+            document.querySelectorAll('.nav-item, .nav-item-mobile').forEach(el => el.classList.remove('active'));
+            document.getElementById(`btn-${t}`)?.classList.add('active');
+            document.getElementById(`mob-${t}`)?.classList.add('active');
+            refreshUI();
+        };
+
+        const refreshUI = () => {
+            const container = document.getElementById('contentArea');
+            if(!container) return;
+            container.innerHTML = '';
+            if (activeTab === 'kasa') renderKasa(container);
+            else if (activeTab === 'gecmis') renderGecmis(container);
+            else if (activeTab === 'stok') renderStok(container);
+            lucide.createIcons();
+            populateProductDropdown();
+        };
+
+        const renderKasa = (container) => {
+            let tFile = 0, tMech = 0, tProd = 0, tDebt = 0;
+            const debts = [];
+            dbData.history.forEach(h => {
+                const total = (h.incomeFile||0) + (h.incomeMech||0) + (h.incomePart||0);
+                if(h.status === 'paid') { tFile += h.incomeFile||0; tMech += h.incomeMech||0; tProd += h.incomePart||0; }
+                else { tDebt += total; debts.push(h); }
+            });
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-red-600 p-6 rounded-3xl shadow-xl"><div class="text-[10px] font-black opacity-60 uppercase mb-1">Nakit Toplam</div><div class="text-4xl font-black">₺${(tFile+tMech+tProd).toLocaleString()}</div></div>
+                    <div class="bg-white/5 border border-white/10 p-5 rounded-3xl"><div class="text-[9px] font-bold opacity-40 uppercase">Yazılım/Mekanik/Parça</div><div class="text-lg font-black italic text-white">₺${tFile.toLocaleString()}/₺${tMech.toLocaleString()}/₺${tProd.toLocaleString()}</div></div>
+                    <div class="bg-yellow-600/20 border border-yellow-600/40 p-5 rounded-3xl md:col-span-2"><div class="text-[9px] font-bold text-yellow-500 uppercase tracking-widest">BEKLEYEN VERESİYE</div><div class="text-3xl font-black text-yellow-500">₺${tDebt.toLocaleString()}</div></div>
+                </div>
+                ${debts.length > 0 ? `<div class="mb-8 space-y-3"><h3 class="text-xs font-black text-yellow-500 uppercase">Borçlu Listesi</h3>${debts.map(h => `
+                    <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-yellow-500">
+                        <div><div class="font-black text-white text-lg uppercase">${h.plate}</div><div class="text-[10px] opacity-40 uppercase">${h.model}</div></div>
+                        <div class="flex items-center gap-4"><div class="font-black text-yellow-500 text-xl">₺${((h.incomeFile||0)+(h.incomeMech||0)+(h.incomePart||0)).toLocaleString()}</div><button onclick="markAsPaid('${h.id}')" class="bg-green-600 text-white p-2 px-4 rounded-xl font-black text-[10px]">KAPAT</button></div>
+                    </div>`).join('')}</div>` : ''}
+                <h3 class="text-xs font-black text-nero-light/40 uppercase mb-4 tracking-[0.2em]">Finansal Akış</h3>
+                <div class="space-y-3">${dbData.history.slice(0, 10).map(h => `
+                    <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 ${h.status==='paid'?'border-green-500':'border-yellow-500'}">
+                        <div><div class="font-black text-white uppercase">${h.plate}</div><div class="text-[9px] opacity-40 uppercase">${h.model}</div></div>
+                        <div class="text-right"><div class="font-black text-white">₺${((h.incomeFile||0)+(h.incomeMech||0)+(h.incomePart||0)).toLocaleString()}</div><div class="text-[8px] opacity-30 font-bold">${h.date}</div></div>
+                    </div>`).join('')}</div>
+            `;
+        };
+
+        const renderGecmis = (container) => {
+            container.innerHTML = `<input type="text" id="sr" placeholder="PLAKA ARA..." class="glass-input mb-4 text-center font-black uppercase" onkeyup="filter()">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="hlist">${dbData.history.map(h => `
+                    <div class="bg-white/5 p-5 rounded-3xl relative border border-white/5 card-item" data-plate="${h.plate}">
+                        <button onclick="delItem('history','${h.id}')" class="absolute top-4 right-4 text-white/10"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <h4 class="text-2xl font-black text-white tracking-tighter uppercase italic">${h.plate}</h4>
+                        <p class="text-[10px] font-bold opacity-30 mb-3">${h.model} | ${h.date}</p>
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <button onclick="document.getElementById('fo_${h.id}').click()" class="bg-blue-500/10 text-blue-400 p-2 rounded-xl text-[9px] font-black border border-blue-500/20 truncate">${h.fileOrig ? '📁 ' + h.fileOrig : '+ ORİJİNAL'}</button>
+                            <button onclick="document.getElementById('fm_${h.id}').click()" class="bg-red-500/10 text-red-400 p-2 rounded-xl text-[9px] font-black border border-red-500/20 truncate">${(h.modFiles?.length > 0) ? `🚀 MODLU (${h.modFiles.length})` : '+ MODLU'}</button>
+                            <input type="file" id="fo_${h.id}" class="hidden" onchange="uploadS('${h.id}', this)">
+                            <input type="file" id="fm_${h.id}" class="hidden" onchange="uploadM('${h.id}', this)">
+                        </div>
+                        <div class="flex justify-between items-center pt-3 border-t border-white/5">
+                            <span class="text-[10px] font-black ${h.status==='paid'?'text-green-500':'text-yellow-500'} uppercase">${h.status}</span>
+                            <span class="font-black text-white italic">₺${((h.incomeFile||0)+(h.incomeMech||0)+(h.incomePart||0)).toLocaleString()}</span>
+                        </div>
+                    </div>`).join('')}</div>`;
+        };
+
+        const renderStok = (container) => {
+            container.innerHTML = `<button onclick="addNewProduct()" class="w-full bg-white text-nero-dark font-black p-4 rounded-xl mb-4 uppercase text-xs shadow-xl">+ YENİ ÜRÜN EKLE</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">${dbData.inventory.map(p => `
+                    <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
+                        <div><div class="text-white font-bold uppercase">${p.name}</div><div class="text-[10px] opacity-40 font-black">₺${p.price}</div></div>
+                        <div class="flex items-center gap-4"><span class="font-black ${p.stock < 5 ? 'text-red-500 animate-pulse' : 'text-green-500'}">${p.stock} ADET</span><button onclick="delItem('inventory','${p.id}')"><i data-lucide="trash-2" class="w-4 h-4 text-white/20"></i></button></div>
+                    </div>`).join('')}</div>`;
+        };
+
+        window.addProdToSelection = () => {
+            const s = document.getElementById('m_product_select');
+            const p = dbData.inventory.find(x => x.id === s.value);
+            if(p) { currentSelections.push(p); renderSelectedList(); }
+            s.value = "";
+        };
+
+        const renderSelectedList = () => {
+            const div = document.getElementById('modal_selected_prods');
+            div.innerHTML = currentSelections.map((p, i) => `<div class="prod-tag">${p.name} <i data-lucide="x" class="w-3 h-3 cursor-pointer" onclick="removeFromSelection(${i})"></i></div>`).join('');
+            lucide.createIcons();
+        };
+
+        window.removeFromSelection = (i) => { currentSelections.splice(i, 1); renderSelectedList(); };
+
+        window.saveTransaction = async (status) => {
+            const plate = document.getElementById('m_plate').value.toUpperCase();
+            if(!plate) return alert("Plaka Girin!");
+            
+            const prodTotal = currentSelections.reduce((sum, p) => sum + (parseFloat(p.price)||0), 0);
+            const id = crypto.randomUUID();
+
+            // 1. İşlemi Kaydet
+            await setDoc(doc(db, 'history', id), {
+                plate, 
+                model: document.getElementById('m_model').value.toUpperCase(), 
+                incomeFile: parseFloat(document.getElementById('m_price_file').value)||0,
+                incomeMech: parseFloat(document.getElementById('m_price_mech').value)||0,
+                incomePart: prodTotal, 
+                status, 
+                date: new Date().toLocaleDateString('tr-TR'), 
+                timestamp: serverTimestamp(), 
+                deleted: false
+            });
+
+            // 2. Stoktan Düş (Hemen Güncelle)
+            for(let p of currentSelections) {
+                const stockRef = doc(db, 'inventory', p.id);
+                await updateDoc(stockRef, { stock: increment(-1) });
+            }
+
+            closeModal();
+            alert("İşlem Başarıyla Kaydedildi!");
+        };
+
+        window.markAsPaid = async (id) => { if(confirm("Borç Kapatılsın mı?")) await updateDoc(doc(db, 'history', id), { status: 'paid' }); };
+        window.uploadS = async (id, inp) => { if(inp.files[0]) await updateDoc(doc(db, 'history', id), { fileOrig: inp.files[0].name }); };
+        window.uploadM = async (id, inp) => { if(inp.files[0]) await updateDoc(doc(db, 'history', id), { modFiles: arrayUnion(inp.files[0].name) }); };
+        window.openModal = () => { currentSelections = []; renderSelectedList(); document.getElementById('entryModal').classList.remove('hidden'); };
+        window.closeModal = () => document.getElementById('entryModal').classList.add('hidden');
+        window.populateProductDropdown = () => {
+            const sel = document.getElementById('m_product_select');
+            if(!sel) return;
+            sel.innerHTML = '<option value="">Ürün Seç...</option>' + dbData.inventory.map(p => `<option value="${p.id}">${p.name} (₺${p.price})</option>`).join('');
+        };
+        window.addNewProduct = async () => {
+            const n = prompt("Ürün Adı?"); const s = prompt("Stok Adedi?"); const p = prompt("Satış Fiyatı?");
+            if(n) await setDoc(doc(db, 'inventory', crypto.randomUUID()), { name: n, stock: parseInt(s), price: parseFloat(p), deleted: false });
+        };
+        window.delItem = async (col, id) => { if(confirm("Kaydı Sileyim mi?")) await updateDoc(doc(db, col, id), { deleted: true }); };
+        window.filter = () => {
+            const v = document.getElementById('sr').value.toLowerCase();
+            document.querySelectorAll('.card-item').forEach(el => el.style.display = el.dataset.plate.toLowerCase().includes(v) ? 'block' : 'none');
+        };
+
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}); }, 1000);
+        checkAuth();
+    </script>
+</body>
+</html>
